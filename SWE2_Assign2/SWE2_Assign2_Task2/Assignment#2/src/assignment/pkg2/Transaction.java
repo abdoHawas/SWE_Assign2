@@ -13,6 +13,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.ECGenParameterSpec;
+import java.util.ArrayList;
 import java.util.Base64;
 
 /**
@@ -20,10 +21,13 @@ import java.util.Base64;
  * @author Khloud
  */
 public class Transaction {
+    String id;
     public PublicKey from;
     public PublicKey to;
     private int amount;
     public byte[] signature;
+    public ArrayList<UnSpentTransaction> UST = new ArrayList<UnSpentTransaction>();
+    public ArrayList<TransactionData> TD = new ArrayList<TransactionData>();
 
     public PublicKey getFrom() {
         return from;
@@ -109,20 +113,86 @@ public class Transaction {
 		}
 
 	}
-    public static String getStringFromKey(Key key) 
-    {
-
-		return Base64.getEncoder().encodeToString(key.getEncoded());
-
-    }
     public void generateSignature(PrivateKey privateKey) {
-        String data = getStringFromKey(from) + getStringFromKey(to) + Float.toString(amount)    ;
+        String data = generateHash.getStringFromKey(from) + generateHash.getStringFromKey(to) + Float.toString(amount)    ;
         signature = CreateSign(privateKey,data);        
     }
     
     public boolean verifySignature() {
-        String data = getStringFromKey(from) + getStringFromKey(to) + Float.toString(amount)    ;
+        String data = generateHash.getStringFromKey(from) + generateHash.getStringFromKey(to) + Float.toString(amount)    ;
         return VerifySign(from, data, signature);
     }
-    
+    public boolean processTransaction() {
+
+        if(verifySignature() == false) {
+
+                System.out.println("#Transaction Signature failed to verify");
+
+                return false;
+
+        }
+
+
+
+        //Gathers transaction inputs (Making sure they are unspent):
+
+        for(UnSpentTransaction i : UST) {
+
+                i.UST = BlockChain.UST.get(i.id);
+
+        }
+
+
+        //Generate transaction outputs:
+
+        int leftOver = getInputsValue() - amount; //get value of inputs then the left over change:
+
+        id = generateHash.CreatHash(generateHash.getStringFromKey(from)+generateHash.getStringFromKey(to)+ Integer.toString(amount));
+
+        TD.add(new TransactionData( this.to, amount,id));
+
+        TD.add(new TransactionData( this.from, leftOver,id)); //send the left over 'change' back to sender		
+
+
+
+        //Add outputs to Unspent list
+
+        for(TransactionData o : TD) {
+
+                BlockChain.UST.put(o.id , o);
+
+        }
+
+
+
+        //Remove transaction inputs from UTXO lists as spent:
+
+        for(UnSpentTransaction i : UST) {
+
+                if(i.UST == null) continue; //if Transaction can't be found skip it 
+
+                BlockChain.UST.remove(i.UST.id);
+
+        }
+
+
+
+        return true;
+
+}
+    public int getInputsValue() {
+
+		int total = 0;
+
+		for(UnSpentTransaction i : UST) {
+
+			if(i.UST == null) continue; //if Transaction can't be found skip it, This behavior may not be optimal.
+
+			total += i.UST.amount;
+
+		}
+
+		return total;
+
+	}
 }

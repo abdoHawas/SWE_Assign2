@@ -6,6 +6,7 @@
 package assignment.pkg2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,6 +16,7 @@ import java.util.List;
 public class BlockChain {
     private List<Block> chain;
     private List<Transaction> Ptrans;
+    public static HashMap<String,TransactionData> UST = new HashMap<String,TransactionData>();
     public BlockChain ()
     {
         chain = new ArrayList<Block>();
