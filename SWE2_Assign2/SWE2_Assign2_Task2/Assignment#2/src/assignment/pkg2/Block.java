@@ -19,19 +19,18 @@ import java.util.Date;
  */
 public class Block
 {
-        private String index;
         private Date TimeStamp;
         private String hash;
         private String previousHash;
-        private Transaction[] transaction;
+        private String data;
         private int dummy = 0;
 
-    public String getIndex() {
-        return index;
+    public String getData() {
+        return data;
     }
 
-    public void setIndex(String index) {
-        this.index = index;
+    public void setData(String data) {
+        this.data = data;
     }
 
     public Date getTimeStamp() {
@@ -66,16 +65,15 @@ public class Block
         return hash;
     }
 
-        public Block(String index, Date ts, Transaction[] t)
+        public Block( Date ts, String d)
         {
-            this.index = index;
             this.TimeStamp = ts;
-            this.transaction = t;
             this.hash = this.CreatHash();
+            this.data = d;
         }
         public String CreatHash()
         {
-            String hashData = "" + this.index + this.TimeStamp + this.previousHash  + this.dummy;
+            String hashData = "" + this.TimeStamp + this.previousHash  + this.dummy;
             MessageDigest digest;
             String encoded = null;
             try {

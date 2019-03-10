@@ -14,9 +14,8 @@ import java.util.List;
  * @author Khloud
  */
 public class BlockChain {
-    private List<Block> chain;
-    private List<Transaction> Ptrans;
-    public static HashMap<String,TransactionData> UST = new HashMap<String,TransactionData>();
+    private static  ArrayList<Block> chain;
+    private static  int difficulty = 1;
     public BlockChain ()
     {
         chain = new ArrayList<Block>();
@@ -24,24 +23,20 @@ public class BlockChain {
     }
     private Block generateGenesis()
     {
-        Block gensis =  new Block("0", new java.util.Date(),null);
+        Block gensis =  new Block( new java.util.Date(),null);
         gensis.setPreviousHash(null);
         gensis.getHash();
         return gensis;
     }
-    void addBlock(Block blockToAdd)
+    public static void addBlock(Block blockToAdd)
     {
-        blockToAdd.proofOfWork(1);
+        blockToAdd.proofOfWork(difficulty);
         blockToAdd.setPreviousHash(chain.get(chain.size()-1).getHash());
         chain.add(blockToAdd);
     }
-    void CreateTrans(Transaction t)
+    public static boolean  validateChain()
     {
-        Ptrans.add(t);
-    }
-    boolean validateChain()
-    {
-        for(int i = 0; i <chain.size();i++)
+        for(int i = 1; i <chain.size();i++)
         {
             Block CurrentBlock = chain.get(i);
             Block PrevBlock = chain.get(i-1);
@@ -59,7 +54,6 @@ public class BlockChain {
             System.out.println(chain.get(i).getHash());
             System.out.println(chain.get(i).getPreviousHash());
             System.out.println(chain.get(i).getTimeStamp());
-            System.out.println(chain.get(i).getIndex());
         }
     }
     
